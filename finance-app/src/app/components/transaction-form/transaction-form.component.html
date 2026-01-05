@@ -1,0 +1,91 @@
+<div class="transaction-container">
+  <h2>Nieuwe Transactie Toevoegen</h2>
+  <p class="subtitle">Voer inkomsten of uitgaven in voor de administratie</p>
+
+  <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="finance-form">
+
+    <div class="form-group">
+      <label>Type</label>
+      <div class="toggle-buttons">
+        <label class="radio-label">
+          <input type="radio" value="EXPENSE" formControlName="type">
+          <span class="box">Uitgave (Kosten)</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" value="INCOME" formControlName="type">
+          <span class="box">Inkomst (Omzet)</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Omschrijving</label>
+      <input
+        id="description"
+        type="text"
+        formControlName="description"
+        placeholder="Bijv. Factuur 2024-001 of Kantoorartikelen"
+      >
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Invoermethode</label>
+        <select formControlName="inputMode">
+          <option value="INCL">Bedrag is Inclusief BTW</option>
+          <option value="EXCL">Bedrag is Exclusief BTW</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>BTW Percentage</label>
+        <select formControlName="vatPercentage">
+          <option [value]="21">21% (Hoog)</option>
+          <option [value]="9">9% (Laag)</option>
+          <option [value]="0">0% (Geen / Verlegd)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="amountInput">Bedrag (€)</label>
+      <input
+        id="amountInput"
+        type="number"
+        formControlName="amountInput"
+        step="0.01"
+        placeholder="0,00"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="date">Factuur-/Bon datum</label>
+      <input
+        id="date"
+        type="date"
+        formControlName="date"
+      >
+    </div>
+
+    <hr>
+
+    <div class="calculation-preview">
+      <div class="preview-row">
+        <span>Bedrag excl. BTW:</span>
+        <span>€ {{ transactionForm.get('amountExclVat')?.value }}</span>
+      </div>
+      <div class="preview-row">
+        <span>BTW ({{ transactionForm.get('vatPercentage')?.value }}%):</span>
+        <span>€ {{ transactionForm.get('vatAmount')?.value }}</span>
+      </div>
+      <div class="preview-row total">
+        <span><strong>Totaal incl. BTW:</strong></span>
+        <span><strong>€ {{ transactionForm.get('amountInclVat')?.value }}</strong></span>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="transactionForm.invalid" class="submit-btn">
+      Transactie Opslaan
+    </button>
+  </form>
+</div>
