@@ -1,13 +1,13 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Compiled output
-/dist
+dist
 /tmp
 /out-tsc
 /bazel-out
 
 # Node
-/node_modules
+node_modules
 npm-debug.log
 yarn-error.log
 
@@ -40,3 +40,31 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Electron build output
+dist-electron/
+dist/
+
+# Dependency mappen
+node_modules/
+
+# IDE instellingen (optioneel maar aangeraden)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Windows systeem bestanden
+Thumbs.db
+desktop.ini
+
+# Log bestanden
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular specifieke tijdelijke mappen
+.angular/

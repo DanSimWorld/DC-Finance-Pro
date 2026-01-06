@@ -1,12 +1,17 @@
 {
-  "name": "finance-app",
-  "version": "0.0.0",
+  "description": "Administratie software voor NK Wellbeing",
+  "author": "Daniel Christiani",
+  "name": "dc-finance-pro",
+  "version": "1.0.0",
+  "main": "app-main.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration production --base-href ./",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "electron": "electron .",
+    "dist:win": "npm run build && electron-builder --win"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +31,8 @@
     "@angular/cli": "^19.2.0",
     "@angular/compiler-cli": "^19.2.0",
     "@types/jasmine": "~5.1.0",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
     "jasmine-core": "~5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
@@ -33,5 +40,24 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.7.2"
+  },
+  "build": {
+    "appId": "com.nkwellbeing.finance",
+    "productName": "DC Finance Pro",
+    "files": [
+      "dist/finance-app/**/*",
+      "app-main.js",
+      "preload.js"
+    ],
+    "win": {
+      "icon": "src/assets/icons/dclogo.ico",
+      "target": "nsis"
+    },
+    "mac": {
+      "icon": "assets/icons/icon.icns"
+    },
+    "directories": {
+      "output": "dist-electron"
+    }
   }
 }
