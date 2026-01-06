@@ -35,3 +35,21 @@
 
   .summary-line { display: flex; justify-content: space-between; padding: 10px 0; &.benefit { color: #27ae60; } &.final { font-size: 1.4rem; } }
 }
+
+/* Voeg dit toe aan je bestaande SCSS */
+.header-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.year-picker {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 2px solid #004494;
+  color: #004494;
+  font-weight: bold;
+  background: white;
+  cursor: pointer;
+}

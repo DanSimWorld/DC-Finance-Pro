@@ -1,6 +1,14 @@
 <div class="aangifte-container">
   <header class="page-header">
-    <h1>Aangiftehulp 2026</h1>
+    <div class="header-title-row">
+      <h1>Aangiftehulp {{ selectedYear() }}</h1>
+      <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set($event)" class="year-picker">
+        <option [value]="2025">2025</option>
+        <option [value]="2026">2026</option>
+        <option [value]="2027">2027</option>
+      </select>
+    </div>
+
     <div class="tab-switcher">
       <button [class.active]="activeTab() === 'BTW'" (click)="activeTab.set('BTW')">BTW Aangifte</button>
       <button [class.active]="activeTab() === 'IB'" (click)="activeTab.set('IB')">Inkomstenbelasting</button>
@@ -17,7 +25,7 @@
     </div>
 
     <div class="tax-form-mockup">
-      <h2>BTW-aangifte Q{{selectedQuarter()}}</h2>
+      <h2>BTW-aangifte Q{{selectedQuarter()}} - {{ selectedYear() }}</h2>
       <p class="hint">Neem deze getallen letterlijk over in de website van de Belastingdienst.</p>
 
       <div class="form-row">
@@ -26,8 +34,8 @@
           <label>Leveringen/diensten belast met 21%</label>
         </div>
         <div class="value-box">
-          <div class="sub-val">Bedrag: <strong>€ {{ btwRapport().rubriek1a.grondslag | number:'1.0-0' }}</strong></div>
-          <div class="sub-val">BTW: <strong>€ {{ btwRapport().rubriek1a.btw | number:'1.0-0' }}</strong></div>
+          <div class="sub-val">Bedrag: <strong>€ {{ btwRapport().rubriek1a.grondslag | number:'1.2-2' }}</strong></div>
+          <div class="sub-val">BTW: <strong>€ {{ btwRapport().rubriek1a.btw | number:'1.2-2' }}</strong></div>
         </div>
       </div>
 
@@ -37,7 +45,7 @@
           <label>Voorbelasting (BTW op inkopen/kosten)</label>
         </div>
         <div class="value-box">
-          <div class="sub-val">BTW: <strong>€ {{ btwRapport().rubriek5b.voorbelasting | number:'1.0-0' }}</strong></div>
+          <div class="sub-val">BTW: <strong>€ {{ btwRapport().rubriek5b.voorbelasting | number:'1.2-2' }}</strong></div>
         </div>
       </div>
 
@@ -50,7 +58,7 @@
 
   <div *ngIf="activeTab() === 'IB'" class="content-section">
     <div class="tax-form-mockup ib-form">
-      <h2>Inkomstenbelasting (Jaaroverzicht)</h2>
+      <h2>Inkomstenbelasting (Jaaroverzicht {{ selectedYear() }})</h2>
 
       <div class="summary-line">
         <label>Bedrijfswinst (Omzet - Kosten):</label>
