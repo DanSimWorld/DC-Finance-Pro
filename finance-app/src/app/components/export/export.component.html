@@ -1,0 +1,139 @@
+<div class="export-container">
+  <header class="no-print">
+    <h1>📤 Exports & Rapportages</h1>
+    <p>Genereer PDF-overzichten voor je eigen administratie of controle.</p>
+  </header>
+
+  <div class="export-grid no-print">
+    <aside class="filter-card">
+      <h3>Stel je export samen</h3>
+
+      <div class="control">
+        <label>Type Export</label>
+        <select [ngModel]="selectedType()" (ngModelChange)="selectedType.set($event)">
+          <option value="UREN">Urenverantwoording</option>
+          <option value="FINANCIEEL">Inkomsten & Uitgaven</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label>Jaar</label>
+        <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set($event)">
+          <option [value]="2024">2024</option>
+          <option [value]="2025">2025</option>
+          <option [value]="2026">2026</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label>Periode</label>
+        <select [ngModel]="selectedMonth()" (ngModelChange)="selectedMonth.set($event)">
+          <option *ngFor="let m of months" [value]="m.id">{{ m.name }}</option>
+        </select>
+      </div>
+
+      <button class="btn-download" (click)="generatePDF()">
+        🖨️ Genereer PDF
+      </button>
+    </aside>
+
+    <main class="preview-card">
+      <div class="preview-header">
+        <h3>Preview</h3>
+        <span class="badge">
+          {{ selectedType() === 'UREN' ? filteredHours().length : filteredFinance().length }} regels gevonden
+        </span>
+      </div>
+
+      <div class="table-scroll">
+        <table *ngIf="selectedType() === 'UREN'" class="modern-table">
+          <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Omschrijving</th>
+            <th class="text-right">Uren</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let item of filteredHours()">
+            <td>{{ item.date | date:'dd-MM-yyyy' }}</td>
+            <td>{{ item.description }}</td>
+            <td class="text-right"><strong>{{ item.duration }} u</strong></td>
+          </tr>
+          </tbody>
+        </table>
+
+        <table *ngIf="selectedType() === 'FINANCIEEL'" class="modern-table">
+          <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Omschrijving</th>
+            <th class="text-right">Ex. BTW</th>
+            <th class="text-right">BTW</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let item of filteredFinance()">
+            <td>{{ item.date | date:'dd-MM-yyyy' }}</td>
+            <td>{{ item.description }}</td>
+            <td class="text-right">€ {{ item.amountExclVat | number:'1.2-2' }}</td>
+            <td class="text-right">€ {{ item.vatAmount | number:'1.2-2' }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div class="print-only">
+    <div class="print-doc-header">
+      <div class="company-info">
+        <h2>NK Wellbeing</h2>
+        <p>Administratie-overzicht</p>
+      </div>
+      <div class="report-meta">
+        <p><strong>Type:</strong> {{ selectedType() === 'UREN' ? 'Urenverantwoording' : 'Financiële Transacties' }}</p>
+        <p><strong>Periode:</strong> {{ selectedMonth() === 0 ? 'Heel jaar' : months[selectedMonth()].name }} {{ selectedYear() }}</p>
+        <p><strong>Datum export:</strong> {{ today | date:'dd-MM-yyyy HH:mm' }}</p>
+      </div>
+    </div>
+
+    <table *ngIf="selectedType() === 'UREN'" class="print-table">
+      <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Project / Omschrijving</th>
+        <th class="text-right">Duur (uur)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of filteredHours()">
+        <td>{{ item.date | date:'dd-MM-yyyy' }}</td>
+        <td>{{ item.description }}</td>
+        <td class="text-right">{{ item.duration }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <table *ngIf="selectedType() === 'FINANCIEEL'" class="print-table">
+      <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Type</th>
+        <th>Omschrijving</th>
+        <th class="text-right">Bedrag Excl. BTW</th>
+        <th class="text-right">BTW Bedrag</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of filteredFinance()">
+        <td>{{ item.date | date:'dd-MM-yyyy' }}</td>
+        <td>{{ item.type === 'INCOME' ? 'Inkomst' : 'Uitgave' }}</td>
+        <td>{{ item.description }}</td>
+        <td class="text-right">€ {{ item.amountExclVat | number:'1.2-2' }}</td>
+        <td class="text-right">€ {{ item.vatAmount | number:'1.2-2' }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
