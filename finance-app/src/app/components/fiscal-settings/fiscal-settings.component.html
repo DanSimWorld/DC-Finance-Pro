@@ -1,0 +1,82 @@
+<div class="fiscal-container">
+  <header class="fiscal-header">
+    <h2>Fiscaal Advies & Planning 2026</h2>
+    <p class="subtitle">Berekening van ondernemersfaciliteiten voor NK Wellbeing</p>
+  </header>
+
+  <div class="fiscal-grid">
+    <div class="settings-column">
+      <section class="card settings-card">
+        <h3>Ondernemerscheck</h3>
+
+        <div class="input-group">
+          <label class="checkbox-container">
+            <input type="checkbox" [checked]="haaltUrencriterium()" (change)="haaltUrencriterium.set(!haaltUrencriterium())">
+            <span class="checkmark"></span>
+            Ik haal het urencriterium (1.225 uur)
+          </label>
+          <p class="hint">Nodig voor de zelfstandigen- en startersaftrek.</p>
+        </div>
+
+        <div class="input-group" *ngIf="haaltUrencriterium()">
+          <label class="checkbox-container">
+            <input type="checkbox" [checked]="isStarter()" (change)="isStarter.set(!isStarter())">
+            <span class="checkmark"></span>
+            Ik ben een startende ondernemer
+          </label>
+          <p class="hint">Je mag de startersaftrek 3 keer toepassen in de eerste 5 jaar.</p>
+        </div>
+      </section>
+
+      <section class="card kor-card">
+        <h3>KOR-Regeling</h3>
+        <p class="hint">Kleineondernemersregeling (omzet < €20.000)</p>
+        <div class="kor-status" [class.warning]="financeService.totalProfit() > 20000">
+          Status: <strong>{{ financeService.totalProfit() > 20000 ? 'Niet beschikbaar (omzet te hoog)' : 'Beschikbaar' }}</strong>
+        </div>
+      </section>
+    </div>
+
+    <div class="results-column">
+      <section class="card result-card">
+        <h3>Fiscale Berekening</h3>
+
+        <div class="calc-row">
+          <span>Bruto Winst (Jaar):</span>
+          <span class="amount">€ {{ financeService.totalProfit() | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="calc-row benefit" *ngIf="haaltUrencriterium()">
+          <span>Zelfstandigenaftrek (2026):</span>
+          <span class="amount">- € {{ ZELFSTANDIGENAFTREK | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="calc-row benefit" *ngIf="haaltUrencriterium() && isStarter()">
+          <span>Startersaftrek:</span>
+          <span class="amount">- € {{ STARTERSAFTREK | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="calc-row benefit">
+          <span>MKB-winstvrijstelling (13,31%):</span>
+          <span class="amount">- € {{ fiscalCalculation().mkbVrijstelling | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="calc-row total-taxable">
+          <span><strong>Belastbare Winst:</strong></span>
+          <span class="amount"><strong>€ {{ fiscalCalculation().belastbareWinst | number:'1.2-2' }}</strong></span>
+        </div>
+
+        <hr>
+
+        <div class="calc-row tax-estimate">
+          <span>Geschatte Inkomstenbelasting:</span>
+          <span class="amount text-danger">€ {{ fiscalCalculation().belastingSchatting | number:'1.2-2' }}</span>
+        </div>
+      </section>
+
+      <div class="info-box" *ngIf="!haaltUrencriterium()">
+        <p>💡 <strong>Tip:</strong> Door het urencriterium te halen, verlaag je je belastbare winst direct met minimaal € {{ ZELFSTANDIGENAFTREK | number:'1.0-0' }}.</p>
+      </div>
+    </div>
+  </div>
+</div>
