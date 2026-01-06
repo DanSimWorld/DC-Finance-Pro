@@ -8,13 +8,16 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 900,
-    icon: path.join(__dirname, 'src/assets/icons/dclogo.ico'), // Let op je pad naar assets!
+    title: "DC Finance Pro",
+    icon: path.join(__dirname, 'dist/finance-app/browser/assets/icons/dclogo.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false
     }
   });
+
+  mainWindow.setMenu(null);
 
   // Check of we in development mode zijn of productie
   const isDev = !app.isPackaged;
@@ -23,7 +26,7 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:4200');
   } else {
     // Na 'ng build' staan je bestanden in dist/dc-finance-pro/browser/index.html
-    mainWindow.loadFile(path.join(__dirname, 'dist/dc-finance-pro/browser/index.html'));
+    mainWindow.loadFile(path.join(__dirname, 'dist/finance-app/browser/index.html'));
   }
 }
 
