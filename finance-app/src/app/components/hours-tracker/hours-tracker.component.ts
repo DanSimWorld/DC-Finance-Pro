@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core'; // Voeg signal toe
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HoursService } from '../../services/hours.service';
@@ -13,12 +13,13 @@ import { HoursService } from '../../services/hours.service';
 export class HoursTrackerComponent {
   hoursService = inject(HoursService);
 
-  // Filters als losse velden (gebonden via ngModel)
-  searchTerm = '';
-  selectedMonth: string | number = 'all';
+  // We maken van de filters Signals. Dit dwingt de UI om te updaten.
+  searchTerm = signal<string>('');
+  selectedMonth = signal<string>('all');
+
   months = ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December'];
 
-  // 1. De mooie categorie-overzichten
+  // 1. De categorie-overzichten (blijft hetzelfde, maar is nu afhankelijk van de urenService)
   hoursByCategory = computed(() => {
     const logs = this.hoursService.hourLogs();
     return {
@@ -30,24 +31,39 @@ export class HoursTrackerComponent {
     };
   });
 
-  // 2. De werkende zoek- en filterfunctie
+  // 2. De FILTER FUNCTIE (Nu gekoppeld aan de signals)
   filteredLogs = computed(() => {
-    let logs = [...this.hoursService.hourLogs()].reverse();
+    const allLogs = this.hoursService.hourLogs();
+    const search = this.searchTerm().toLowerCase().trim();
+    const month = this.selectedMonth();
 
-    // Filter op zoekterm
-    if (this.searchTerm.trim()) {
-      logs = logs.filter(l =>
-        l.description.toLowerCase().includes(this.searchTerm.toLowerCase())
+    let filtered = [...allLogs];
+
+    // Filter op tekst
+    if (search) {
+      filtered = filtered.filter(log =>
+        log.description.toLowerCase().includes(search) ||
+        log.category.toLowerCase().includes(search)
       );
     }
 
     // Filter op maand
-    if (this.selectedMonth !== 'all') {
-      logs = logs.filter(l => l.date.getMonth() === Number(this.selectedMonth));
+    if (month !== 'all') {
+      filtered = filtered.filter(log => log.date.getMonth() === Number(month));
     }
 
-    return logs;
+    // Altijd de nieuwste bovenaan
+    return filtered.reverse();
   });
+
+  // Event handlers voor de UI om de signals te updaten
+  updateSearch(value: string) {
+    this.searchTerm.set(value);
+  }
+
+  updateMonth(value: string) {
+    this.selectedMonth.set(value);
+  }
 
   onAddHours(event: any) {
     event.preventDefault();
@@ -64,6 +80,8 @@ export class HoursTrackerComponent {
   }
 
   onDelete(id: string) {
-    if(confirm('Uren verwijderen?')) this.hoursService.deleteLog(id);
+    if(confirm('Uren verwijderen?')) {
+      this.hoursService.deleteLog(id);
+    }
   }
 }

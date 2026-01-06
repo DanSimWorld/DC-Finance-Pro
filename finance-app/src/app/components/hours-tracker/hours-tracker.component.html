@@ -77,8 +77,19 @@
     <div class="history-header">
       <h3>Historie</h3>
       <div class="filter-controls">
-        <input type="text" placeholder="Zoek op omschrijving..." [(ngModel)]="searchTerm" class="search-input">
-        <select [(ngModel)]="selectedMonth" class="month-select">
+        <input
+          type="text"
+          placeholder="Zoek op omschrijving..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="updateSearch($event)"
+          class="search-input"
+        >
+
+        <select
+          [ngModel]="selectedMonth()"
+          (ngModelChange)="updateMonth($event)"
+          class="month-select"
+        >
           <option value="all">Alle maanden</option>
           <option *ngFor="let m of months; let i = index" [value]="i">{{ m }}</option>
         </select>
