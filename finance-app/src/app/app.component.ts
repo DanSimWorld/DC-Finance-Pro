@@ -8,11 +8,12 @@ import { RouterModule } from '@angular/router'; // Importeer RouterModule voor n
   template: `
     <div class="main-layout">
       <nav class="top-nav">
-        <h1>NK Finance Pro</h1>
+        <h1>DC Finance Pro</h1>
         <div class="nav-links">
           <button routerLink="/add" routerLinkActive="active">➕ Toevoegen</button>
           <button routerLink="/dashboard" routerLinkActive="active">📊 Dashboard</button>
           <button routerLink="/fiscal" routerLinkActive="active">⚖️ Fiscaal Advies</button>
+          <button routerLink="/hours" routerLinkActive="active">⏱️ Uren</button>
         </div>
       </nav>
 

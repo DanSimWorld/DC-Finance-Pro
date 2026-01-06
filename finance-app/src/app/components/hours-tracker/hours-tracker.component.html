@@ -1,0 +1,111 @@
+<div class="hours-container">
+  <section class="card progress-card">
+    <div class="progress-info">
+      <h3>Voortgang Urencriterium 2026</h3>
+      <span class="percentage">{{ hoursService.progressPercentage() | number:'1.0-0' }}%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" [style.width.%]="hoursService.progressPercentage()"></div>
+    </div>
+    <p class="progress-status">
+      Gewerkt: <strong>{{ hoursService.totalHours() }}u</strong> van <strong>1225u</strong>.
+      Nog {{ 1225 - hoursService.totalHours() }} uur te gaan!
+    </p>
+  </section>
+
+  <div class="category-grid">
+    <div class="cat-card client">
+      <div class="icon">👥</div>
+      <div class="details">
+        <label>Klanten</label>
+        <span class="val">{{ hoursByCategory().KLANT }} <small>u</small></span>
+      </div>
+    </div>
+    <div class="cat-card admin">
+      <div class="icon">📂</div>
+      <div class="details">
+        <label>Admin</label>
+        <span class="val">{{ hoursByCategory().ADMIN }} <small>u</small></span>
+      </div>
+    </div>
+    <div class="cat-card marketing">
+      <div class="icon">📣</div>
+      <div class="details">
+        <label>Marketing</label>
+        <span class="val">{{ hoursByCategory().MARKETING }} <small>u</small></span>
+      </div>
+    </div>
+    <div class="cat-card study">
+      <div class="icon">📚</div>
+      <div class="details">
+        <label>Studie</label>
+        <span class="val">{{ hoursByCategory().STUDIE }} <small>u</small></span>
+      </div>
+    </div>
+  </div>
+
+  <section class="card entry-card">
+    <h3>Nieuwe uren loggen</h3>
+    <form (submit)="onAddHours($event)" #hoursForm="ngForm" class="horizontal-form">
+      <div class="input-group">
+        <label>Datum</label>
+        <input type="date" name="date" ngModel required>
+      </div>
+      <div class="input-group uren">
+        <label>Aantal uur</label>
+        <input type="number" step="0.5" name="duration" placeholder="0.0" ngModel required>
+      </div>
+      <div class="input-group">
+        <label>Categorie</label>
+        <select name="category" ngModel="KLANT" required>
+          <option value="KLANT">Klanten/Projecten</option>
+          <option value="ADMIN">Administratie</option>
+          <option value="MARKETING">Marketing/Acquisitie</option>
+          <option value="STUDIE">Studie/Training</option>
+          <option value="OVERIG">Overig</option>
+        </select>
+      </div>
+      <div class="input-group omschrijving">
+        <label>Wat heb je gedaan?</label>
+        <input type="text" name="description" placeholder="Bijv. Coaching sessie klant X..." ngModel required>
+      </div>
+      <button type="submit" class="btn-primary" [disabled]="!hoursForm.valid">Toevoegen</button>
+    </form>
+  </section>
+
+  <section class="card history-card">
+    <div class="history-header">
+      <h3>Historie</h3>
+      <div class="filter-controls">
+        <input type="text" placeholder="Zoek op omschrijving..." [(ngModel)]="searchTerm" class="search-input">
+        <select [(ngModel)]="selectedMonth" class="month-select">
+          <option value="all">Alle maanden</option>
+          <option *ngFor="let m of months; let i = index" [value]="i">{{ m }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+        <tr>
+          <th>Datum</th>
+          <th>Categorie</th>
+          <th>Omschrijving</th>
+          <th>Duur</th>
+          <th>Actie</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let log of filteredLogs()">
+          <td>{{ log.date | date:'dd-MM-yyyy' }}</td>
+          <td><span class="badge" [ngClass]="log.category.toLowerCase()">{{ log.category }}</span></td>
+          <td>{{ log.description }}</td>
+          <td class="bold">{{ log.duration }} u</td>
+          <td><button class="btn-delete" (click)="onDelete(log.id)">🗑️</button></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
