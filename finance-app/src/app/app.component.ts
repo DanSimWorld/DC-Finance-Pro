@@ -1,25 +1,23 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Nodig voor *ngIf
-import { TransactionFormComponent } from './components/transaction-form/transaction-form.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { RouterModule } from '@angular/router'; // Importeer RouterModule voor navigatie
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, TransactionFormComponent, DashboardComponent],
+  imports: [RouterModule], // Alleen RouterModule is nu nodig
   template: `
     <div class="main-layout">
       <nav class="top-nav">
         <h1>NK Finance Pro</h1>
         <div class="nav-links">
-          <button (click)="view = 'form'" [class.active]="view === 'form'">➕ Toevoegen</button>
-          <button (click)="view = 'dash'" [class.active]="view === 'dash'">📊 Dashboard</button>
+          <button routerLink="/add" routerLinkActive="active">➕ Toevoegen</button>
+          <button routerLink="/dashboard" routerLinkActive="active">📊 Dashboard</button>
+          <button routerLink="/fiscal" routerLinkActive="active">⚖️ Fiscaal Advies</button>
         </div>
       </nav>
 
       <main class="content">
-        <app-transaction-form *ngIf="view === 'form'"></app-transaction-form>
-        <app-dashboard *ngIf="view === 'dash'"></app-dashboard>
+        <router-outlet></router-outlet>
       </main>
     </div>
   `,
@@ -41,12 +39,11 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
       border-radius: 4px;
       background: #555;
       color: white;
+      text-decoration: none;
     }
-    .nav-links button.active { background: #28a745; }
+    /* routerLinkActive zorgt dat de knop van de actieve pagina groen wordt */
+    .active { background: #28a745 !important; }
     .content { padding: 20px; }
   `]
 })
-export class AppComponent {
-  // Simpele variabele om te switchen tussen schermen zonder complexe routing
-  view: 'form' | 'dash' = 'dash';
-}
+export class AppComponent {}
