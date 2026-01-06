@@ -4,6 +4,7 @@ import { TransactionFormComponent } from './components/transaction-form/transact
 import { FiscalSettingsComponent } from './components/fiscal-settings/fiscal-settings.component';
 import { HoursTrackerComponent} from './components/hours-tracker/hours-tracker.component';
 import { AangifteHulpComponent} from './components/aangifte-hulp/aangifte-hulp.component';
+import { ExportComponent} from './components/export/export.component';
 
 
 export const routes: Routes = [
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: 'fiscal', component: FiscalSettingsComponent },
   { path: 'hours', component: HoursTrackerComponent },
   { path: 'aangifte', component: AangifteHulpComponent },
+  { path: 'exports', component: ExportComponent },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' }, // Standaard route
   { path: '**', redirectTo: 'dashboard' }, // Fallback bij onbekende URL
 
