@@ -1,4 +1,4 @@
-import { Injectable, signal, effect, computed } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { HourLog } from '../models/hour-log.model';
 
 @Injectable({ providedIn: 'root' })
@@ -7,15 +7,32 @@ export class HoursService {
   readonly TARGET_HOURS = 1225;
 
   constructor() {
-    const saved = localStorage.getItem('hour_logs');
-    if (saved) {
-      this.hourLogs.set(JSON.parse(saved).map((l: any) => ({ ...l, date: new Date(l.date) })));
-    }
-
-    effect(() => {
-      localStorage.setItem('hour_logs', JSON.stringify(this.hourLogs()));
-    });
+    // Start direct met laden van de harde schijf
+    this.loadFromDisk();
   }
+
+  // --- Electron Opslag Logica ---
+
+  private async loadFromDisk() {
+    const electron = (window as any).electron;
+    if (electron) {
+      const saved = await electron.getData('hour_logs');
+      if (saved && Array.isArray(saved)) {
+        this.hourLogs.set(
+          saved.map((l: any) => ({ ...l, date: new Date(l.date) }))
+        );
+      }
+    }
+  }
+
+  private async saveToDisk() {
+    const electron = (window as any).electron;
+    if (electron) {
+      await electron.saveData('hour_logs', this.hourLogs());
+    }
+  }
+
+  // --- Acties ---
 
   addHours(duration: number, description: string, category: any, date: Date) {
     const newLog: HourLog = {
@@ -26,17 +43,26 @@ export class HoursService {
       duration
     };
     this.hourLogs.update(prev => [...prev, newLog]);
+
+    // Sla direct op naar de harde schijf
+    this.saveToDisk();
   }
 
   deleteLog(id: string) {
     this.hourLogs.update(prev => prev.filter(l => l.id !== id));
+
+    // Sla de wijziging op
+    this.saveToDisk();
   }
+
+  // --- Computed Waarden ---
 
   totalHours = computed(() => {
     return this.hourLogs().reduce((acc, l) => acc + l.duration, 0);
   });
 
   progressPercentage = computed(() => {
-    return Math.min(100, (this.totalHours() / this.TARGET_HOURS) * 100);
+    const total = this.totalHours();
+    return Math.min(100, (total / this.TARGET_HOURS) * 100);
   });
 }
