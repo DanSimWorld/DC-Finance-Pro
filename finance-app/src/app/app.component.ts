@@ -14,6 +14,7 @@ import { RouterModule } from '@angular/router'; // Importeer RouterModule voor n
           <button routerLink="/dashboard" routerLinkActive="active">📊 Dashboard</button>
           <button routerLink="/fiscal" routerLinkActive="active">⚖️ Fiscaal Advies</button>
           <button routerLink="/hours" routerLinkActive="active">⏱️ Uren</button>
+          <button routerLink="/aangifte" routerLinkActive="active">📋 Aangiftehulp</button>
         </div>
       </nav>
 

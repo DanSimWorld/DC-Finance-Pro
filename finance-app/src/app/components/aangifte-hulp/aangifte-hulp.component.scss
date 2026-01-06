@@ -1,0 +1,37 @@
+.aangifte-container {
+  max-width: 900px;
+  margin: 0 auto;
+
+  .tab-switcher {
+    display: flex; gap: 10px; margin-bottom: 2rem;
+    button {
+      flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+      &.active { background: #004494; color: white; }
+    }
+  }
+
+  .quarter-selector {
+    display: flex; gap: 10px; margin-bottom: 2rem;
+    button {
+      flex: 1; padding: 10px; border: 2px solid #004494; background: white; border-radius: 4px; cursor: pointer;
+      &.active { background: #004494; color: white; }
+    }
+  }
+
+  .tax-form-mockup {
+    background: #f0f7ff; padding: 30px; border-radius: 12px; border: 1px solid #c2d6eb;
+
+    .form-row {
+      display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #d0e1f3;
+      .label-box { display: flex; gap: 15px; align-items: center; .code { background: #004494; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; } }
+      .value-box { text-align: right; }
+    }
+
+    .total-bar {
+      margin-top: 20px; padding: 20px; background: #e0f0e0; border-radius: 8px; display: flex; justify-content: space-between; font-size: 1.2rem;
+      &.negative { background: #fdeaea; color: #c0392b; }
+    }
+  }
+
+  .summary-line { display: flex; justify-content: space-between; padding: 10px 0; &.benefit { color: #27ae60; } &.final { font-size: 1.4rem; } }
+}

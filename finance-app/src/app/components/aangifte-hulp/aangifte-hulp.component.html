@@ -1,0 +1,78 @@
+<div class="aangifte-container">
+  <header class="page-header">
+    <h1>Aangiftehulp 2026</h1>
+    <div class="tab-switcher">
+      <button [class.active]="activeTab() === 'BTW'" (click)="activeTab.set('BTW')">BTW Aangifte</button>
+      <button [class.active]="activeTab() === 'IB'" (click)="activeTab.set('IB')">Inkomstenbelasting</button>
+    </div>
+  </header>
+
+  <div *ngIf="activeTab() === 'BTW'" class="content-section">
+    <div class="quarter-selector">
+      <button *ngFor="let q of [1,2,3,4]"
+              [class.active]="selectedQuarter() === q"
+              (click)="selectedQuarter.set(q)">
+        Kwartaal {{q}}
+      </button>
+    </div>
+
+    <div class="tax-form-mockup">
+      <h2>BTW-aangifte Q{{selectedQuarter()}}</h2>
+      <p class="hint">Neem deze getallen letterlijk over in de website van de Belastingdienst.</p>
+
+      <div class="form-row">
+        <div class="label-box">
+          <span class="code">1a</span>
+          <label>Leveringen/diensten belast met 21%</label>
+        </div>
+        <div class="value-box">
+          <div class="sub-val">Bedrag: <strong>€ {{ btwRapport().rubriek1a.grondslag | number:'1.0-0' }}</strong></div>
+          <div class="sub-val">BTW: <strong>€ {{ btwRapport().rubriek1a.btw | number:'1.0-0' }}</strong></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="label-box">
+          <span class="code">5b</span>
+          <label>Voorbelasting (BTW op inkopen/kosten)</label>
+        </div>
+        <div class="value-box">
+          <div class="sub-val">BTW: <strong>€ {{ btwRapport().rubriek5b.voorbelasting | number:'1.0-0' }}</strong></div>
+        </div>
+      </div>
+
+      <div class="total-bar" [class.negative]="btwRapport().totaal > 0">
+        <span>Totaal te betalen / ontvangen:</span>
+        <strong>€ {{ btwRapport().totaal | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab() === 'IB'" class="content-section">
+    <div class="tax-form-mockup ib-form">
+      <h2>Inkomstenbelasting (Jaaroverzicht)</h2>
+
+      <div class="summary-line">
+        <label>Bedrijfswinst (Omzet - Kosten):</label>
+        <span>€ {{ ibRapport().winst | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-line benefit">
+        <label>Zelfstandigenaftrek (Uren: {{ ibRapport().uren }}u):</label>
+        <span>- € {{ ibRapport().zelfstAftrek | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-line benefit">
+        <label>MKB-winstvrijstelling (13,31%):</label>
+        <span>- € {{ ibRapport().mkbVrijstelling | number:'1.2-2' }}</span>
+      </div>
+
+      <hr>
+
+      <div class="summary-line final">
+        <label>Belastbare Winst (In te vullen):</label>
+        <strong>€ {{ ibRapport().belastbaar | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+  </div>
+</div>
