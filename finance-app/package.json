@@ -2,7 +2,7 @@
   "description": "Administratie software voor NK Wellbeing",
   "author": "Daniel Christiani",
   "name": "dc-finance-pro",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "app-main.js",
   "scripts": {
     "ng": "ng",

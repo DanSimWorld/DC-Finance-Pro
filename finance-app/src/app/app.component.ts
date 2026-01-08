@@ -12,7 +12,7 @@ import { FinanceService } from './services/finance.service';
       <div class="auth-overlay">
         <div class="auth-card">
           <div class="auth-header">
-            <img src="/dclogo.png" alt="DC Logo" class="app-logo">
+            <img src="assets/dclogo.png" alt="DC Logo" class="app-logo">
             <h2>DC Finance Pro</h2>
             <p>{{ !financeService.settings()?.isSetup ? 'Stel je administratie in' : 'Welkom terug' }}</p>
           </div>
@@ -52,7 +52,7 @@ import { FinanceService } from './services/finance.service';
       <div class="app-wrapper">
         <nav class="top-nav">
           <div class="nav-left">
-            <img src="/dclogo.png" alt="DC Logo" class="nav-logo">
+            <img src="assets/dclogo.png" alt="DC Logo" class="nav-logo">
             <div class="brand-info">
               <span class="logo-text">DC Finance Pro</span>
               <span class="company-sub">{{ financeService.settings()?.companyName }}</span>
