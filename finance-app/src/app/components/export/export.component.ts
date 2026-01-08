@@ -59,10 +59,13 @@ export class ExportComponent {
     const year = this.selectedYear();
     const monthName = this.months.find(m => m.id === Number(this.selectedMonth()))?.name;
 
+    // Dynamische bedrijfsnaam ophalen (met fallback voor het geval dat)
+    const companyName = this.financeService.settings()?.companyName || 'Mijn Administratie';
+
     // --- PDF Header ---
     doc.setFontSize(18);
-    doc.setTextColor(0, 68, 148); // Blauwe NK Wellbeing kleur
-    doc.text('NK Wellbeing - Administratie Overzicht', 14, 20);
+    doc.setTextColor(0, 68, 148); // Je kunt deze kleur eventueel ook aanpassen aan haar huisstijl
+    doc.text(`${companyName} - Administratie Overzicht`, 14, 20);
 
     doc.setFontSize(10);
     doc.setTextColor(80);
@@ -87,13 +90,14 @@ export class ExportComponent {
         theme: 'striped'
       });
     } else {
-      const head = [['Datum', 'Type', 'Omschrijving', 'Excl. BTW', 'BTW Bedrag']];
+      const head = [['Datum', 'Type', 'Omschrijving', 'Excl. BTW', 'BTW Bedrag', 'BTW %']];
       const body = this.filteredFinance().map(item => [
         this.datePipe.transform(item.date, 'dd-MM-yyyy') || '',
         item.type === 'INCOME' ? 'Inkomst' : 'Uitgave',
         item.description,
         `€ ${this.decimalPipe.transform(item.amountExclVat, '1.2-2')}`,
-        `€ ${this.decimalPipe.transform(item.vatAmount, '1.2-2')}`
+        `€ ${this.decimalPipe.transform(item.vatAmount, '1.2-2')}`,
+        `${item.vatPercentage}%`
       ]);
 
       autoTable(doc, {
@@ -105,8 +109,9 @@ export class ExportComponent {
       });
     }
 
-    // --- Downloaden ---
-    const filename = `NK_Wellbeing_${isUren ? 'Uren' : 'Financieel'}_${monthName}_${year}.pdf`;
+    // --- Downloaden (Bestandsnaam ook dynamisch maken) ---
+    const safeCompanyName = companyName.replace(/\s+/g, '_'); // Vervang spaties door underscores
+    const filename = `${safeCompanyName}_${isUren ? 'Uren' : 'Financieel'}_${monthName}_${year}.pdf`;
     doc.save(filename);
   }
 }
