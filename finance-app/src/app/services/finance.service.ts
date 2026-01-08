@@ -1,9 +1,12 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Transaction } from '../models/transaction.model';
+import { Transaction, UserSettings } from '../models/transaction.model';
+
 
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
   transactions = signal<Transaction[]>([]);
+  settings = signal<UserSettings | null>(null);
+  isAuthenticated = signal<boolean>(false);
 
   constructor() {
     this.loadFromDisk();
@@ -16,9 +19,6 @@ export class FinanceService {
     }, 0);
   });
 
-  // 2. Totaaloverzicht BTW: Wat moet je daadwerkelijk betalen of krijg je terug?
-  // Verlegde BTW (4a/4b) heft elkaar hier op (betalen - terugvragen = 0)
-  // Dit is het bedrag dat je daadwerkelijk moet afdragen of terugkrijgt
   totalVatBalance = computed(() => {
     const list = this.transactions();
 
@@ -78,6 +78,12 @@ export class FinanceService {
     const electron = (window as any).electron;
     if (electron) {
       const data = await electron.getData('finance_data');
+      const savedSettings = await electron.getData('user_settings'); // Nieuwe sleutel
+
+      if (savedSettings) {
+        this.settings.set(savedSettings);
+      }
+
       if (data && Array.isArray(data)) {
         const formattedData = data.map(t => ({
           ...t,
@@ -89,6 +95,26 @@ export class FinanceService {
     }
   }
 
+// Methode om setup te voltooien
+  async setupAccount(companyName: string, pincode: string) {
+    const newSettings: UserSettings = { companyName, pincode, isSetup: true };
+    this.settings.set(newSettings);
+    this.isAuthenticated.set(true);
+
+    const electron = (window as any).electron;
+    if (electron) {
+      await electron.saveData('user_settings', newSettings);
+    }
+  }
+
+// Methode om in te loggen
+  login(pincode: string): boolean {
+    if (this.settings()?.pincode === pincode) {
+      this.isAuthenticated.set(true);
+      return true;
+    }
+    return false;
+  }
   // --- ACTIES (ongewijzigd) ---
   addTransaction(
     amountInput: number,
