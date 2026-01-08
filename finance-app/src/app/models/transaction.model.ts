@@ -2,10 +2,12 @@ export interface Transaction {
   id: string;
   date: Date;
   description: string;
-  amountExclVat: number; // Bedrag zonder BTW
-  vatPercentage: 0 | 9 | 21; // De standaard NL tarieven
-  vatAmount: number;     // Het berekende BTW bedrag
-  amountInclVat: number; // Totaalbedrag (incl. BTW)
+  amountExclVat: number;
+  vatPercentage: 0 | 9 | 21;
+  vatAmount: number;
+  amountInclVat: number;
   type: 'INCOME' | 'EXPENSE';
-  category: string;      // Bijv. 'Huur', 'Inkoop', 'Verkoop'
+  category: string;
+  // Nieuw: Voor de belastingdienst rubrieken
+  taxCategory?: '1A' | '1B' | '4A' | '4B' | 'NONE';
 }

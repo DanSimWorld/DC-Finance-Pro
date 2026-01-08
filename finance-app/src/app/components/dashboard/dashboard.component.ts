@@ -32,14 +32,39 @@ export class DashboardComponent {
 
     const omzetExcl = txs.filter(t => t.type === 'INCOME').reduce((acc, t) => acc + t.amountExclVat, 0);
     const kostenExcl = txs.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + t.amountExclVat, 0);
-    const btwOntvangen = txs.filter(t => t.type === 'INCOME').reduce((acc, t) => acc + t.vatAmount, 0);
-    const btwBetaald = txs.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + t.vatAmount, 0);
+
+    // BTW berekening aangepast voor verlegde BTW
+    const btwVerschuldigd = txs.reduce((acc, t) => {
+      // Normale inkomsten BTW + Verlegde BTW (4a/4b) die je nog moet aangeven
+      if (t.type === 'INCOME') return acc + t.vatAmount;
+      if (t.taxCategory === '4A' || t.taxCategory === '4B') return acc + t.vatAmount;
+      return acc;
+    }, 0);
+
+    const btwAftrekbaar = txs.filter(t => t.type === 'EXPENSE').reduce((acc, t) => acc + t.vatAmount, 0);
 
     const winst = omzetExcl - kostenExcl;
-    const teBetalenBtw = btwOntvangen - btwBetaald;
+    // Hier vallen 4a/4b nu tegen elkaar weg (Verschuldigd - Aftrekbaar = 0)
+    const teBetalenBtw = btwVerschuldigd - btwAftrekbaar;
 
-    // Inkomstenbelasting reservering (30% is een veilige marge voor ZZP)
     const reserveringIB = winst > 0 ? winst * 0.30 : 0;
+
+    // Rapportage data voor de tabel in HTML
+    const taxReport = {
+      rubriek1a: {
+        omzet: txs.filter(t => t.taxCategory === '1A').reduce((acc, t) => acc + t.amountExclVat, 0),
+        btw: txs.filter(t => t.taxCategory === '1A').reduce((acc, t) => acc + t.vatAmount, 0)
+      },
+      rubriek4a: {
+        omzet: txs.filter(t => t.taxCategory === '4A').reduce((acc, t) => acc + t.amountExclVat, 0),
+        btw: txs.filter(t => t.taxCategory === '4A').reduce((acc, t) => acc + t.vatAmount, 0)
+      },
+      rubriek4b: {
+        omzet: txs.filter(t => t.taxCategory === '4B').reduce((acc, t) => acc + t.amountExclVat, 0),
+        btw: txs.filter(t => t.taxCategory === '4B').reduce((acc, t) => acc + t.vatAmount, 0)
+      },
+      rubriek5b: btwAftrekbaar
+    };
 
     return {
       omzetExcl,
@@ -47,7 +72,8 @@ export class DashboardComponent {
       winst,
       teBetalenBtw,
       reserveringIB,
-      besteedbaar: winst - reserveringIB
+      besteedbaar: winst - reserveringIB,
+      taxReport // Geef dit door aan de HTML
     };
   });
   // In dashboard.component.ts

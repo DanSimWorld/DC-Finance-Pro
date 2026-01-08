@@ -17,20 +17,27 @@ export class TransactionFormComponent implements OnInit {
   transactionForm!: FormGroup;
 
   ngOnInit() {
-// In ngOnInit()
     this.transactionForm = this.fb.group({
-      date: [new Date().toISOString().substring(0, 10), Validators.required], // Standaard op vandaag (YYYY-MM-DD)
+      date: [new Date().toISOString().substring(0, 10), Validators.required],
       description: ['', Validators.required],
       type: ['EXPENSE', Validators.required],
       inputMode: ['INCL'],
       amountInput: [0, [Validators.required, Validators.min(0.01)]],
       vatPercentage: [21, Validators.required],
+      taxCategory: ['NONE'],
       amountExclVat: [{ value: 0, disabled: true }],
       vatAmount: [{ value: 0, disabled: true }],
       amountInclVat: [{ value: 0, disabled: true }]
     });
 
-    // Luister naar veranderingen voor automatische berekening
+    this.transactionForm.get('type')?.valueChanges.subscribe(newType => {
+      if (newType === 'INCOME') {
+        this.transactionForm.patchValue({ taxCategory: '1A' }, { emitEvent: false });
+      } else {
+        this.transactionForm.patchValue({ taxCategory: 'NONE' }, { emitEvent: false });
+      }
+    });
+
     this.transactionForm.valueChanges.subscribe(() => {
       this.calculateTotals();
     });
@@ -40,17 +47,20 @@ export class TransactionFormComponent implements OnInit {
     const inputAmount = this.transactionForm.get('amountInput')?.value || 0;
     const percentage = this.transactionForm.get('vatPercentage')?.value || 0;
     const mode = this.transactionForm.get('inputMode')?.value;
+    const taxCat = this.transactionForm.get('taxCategory')?.value; // NIEUW
 
     let excl, vat, incl;
 
-    if (mode === 'INCL') {
-      // Terugrekenen van Incl naar Excl
-      // Formule: Incl / (1 + (percentage/100))
+    if (taxCat === '4A' || taxCat === '4B') {
+      // Verlegde BTW logica voor preview
+      excl = inputAmount;
+      vat = excl * (percentage / 100);
+      incl = excl; // Je betaalt de BTW niet aan de leverancier
+    } else if (mode === 'INCL') {
       excl = inputAmount / (1 + (percentage / 100));
       incl = inputAmount;
       vat = incl - excl;
     } else {
-      // Omhoog rekenen van Excl naar Incl
       excl = inputAmount;
       vat = excl * (percentage / 100);
       incl = excl + vat;
@@ -67,13 +77,22 @@ export class TransactionFormComponent implements OnInit {
     if (this.transactionForm.valid) {
       const rawData = this.transactionForm.getRawValue();
       this.financeService.addTransaction(
-        rawData.amountInput, // we gebruiken nu de mode-logica in de service of form
+        rawData.amountInput,
         rawData.vatPercentage,
         rawData.type,
         rawData.description,
-        new Date(rawData.date) // De gekozen datum omzetten naar een Date object
+        new Date(rawData.date),
+        rawData.inputMode,
+        rawData.taxCategory // NIEUW: Wordt nu doorgegeven aan de service
       );
-      this.transactionForm.reset({ type: 'EXPENSE', vatPercentage: 21 });
+      // Reset met default NONE voor taxCategory
+      this.transactionForm.reset({
+        date: new Date().toISOString().substring(0, 10),
+        type: 'EXPENSE',
+        vatPercentage: 21,
+        taxCategory: 'NONE',
+        amountInput: 0
+      });
     }
   }
 }

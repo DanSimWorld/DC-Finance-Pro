@@ -67,6 +67,22 @@
       >
     </div>
 
+    <div class="form-group">
+      <label>BTW Rubriek (Belastingdienst)</label>
+      <select formControlName="taxCategory">
+        <ng-container *ngIf="transactionForm.get('type')?.value === 'EXPENSE'">
+          <option value="NONE">Standaard (Voorbelasting 5b)</option>
+          <option value="4A">Rubriek 4a: Diensten van buiten de EU (Verlegd)</option>
+          <option value="4B">Rubriek 4b: Diensten binnen de EU (Verlegd)</option>
+        </ng-container>
+
+        <ng-container *ngIf="transactionForm.get('type')?.value === 'INCOME'">
+          <option value="1A">Rubriek 1a: Leveringen/diensten 21% (Omzet)</option>
+          <option value="NONE">Overig / Vrijgesteld</option>
+        </ng-container>
+      </select>
+    </div>
+
     <hr>
 
     <div class="calculation-preview">

@@ -6,23 +6,67 @@ export class FinanceService {
   transactions = signal<Transaction[]>([]);
 
   constructor() {
-    // Zodra de service wordt geladen, halen we de data op uit het bestand
     this.loadFromDisk();
   }
 
+  // 1. Winstberekening (Excl. BTW)
   totalProfit = computed(() => {
     return this.transactions().reduce((acc, t) => {
       return t.type === 'INCOME' ? acc + t.amountExclVat : acc - t.amountExclVat;
     }, 0);
   });
 
-  vatBalance = computed(() => {
+  // 2. Totaaloverzicht BTW: Wat moet je daadwerkelijk betalen of krijg je terug?
+  // Verlegde BTW (4a/4b) heft elkaar hier op (betalen - terugvragen = 0)
+  // Dit is het bedrag dat je daadwerkelijk moet afdragen of terugkrijgt
+  totalVatBalance = computed(() => {
+    const list = this.transactions();
+
+    // 1. Wat je moet betalen (Rubriek 1a + Rubriek 4a + Rubriek 4b)
+    const verschuldigd = list.reduce((acc, t) => {
+      if (t.type === 'INCOME') return acc + t.vatAmount;
+      if (t.taxCategory === '4A' || t.taxCategory === '4B') return acc + t.vatAmount;
+      return acc;
+    }, 0);
+
+    // 2. Wat je mag aftrekken (Alle uitgaven BTW, inclusief verlegde BTW bij 5b)
+    const aftrekbaar = list.reduce((acc, t) => {
+      if (t.type === 'EXPENSE') return acc + t.vatAmount;
+      return acc;
+    }, 0);
+
+    // Het resultaat: (Normale BTW verkoop + Verlegde BTW) - (Normale BTW inkoop + Verlegde BTW)
+    // De verlegde BTW valt hierdoor weg tegen elkaar (Som - Som = 0)
+    return verschuldigd - aftrekbaar;
+  });
+
+  // 3. Rubriek 5b: Dit is puur voor het invulveld op de aangifte (Inclusief de verlegde BTW)
+  totalVatPreTax = computed(() => {
     return this.transactions().reduce((acc, t) => {
-      return t.type === 'INCOME' ? acc + t.vatAmount : acc - t.vatAmount;
+      return t.type === 'EXPENSE' ? acc + t.vatAmount : acc;
     }, 0);
   });
 
-  // Hulpfunctie om data veilig naar de harde schijf te schrijven
+  // 4. Het BTW Rapportage object voor het aangifte-tabelletje
+  taxReport = computed(() => {
+    const list = this.transactions();
+    return {
+      rubriek1a: {
+        omzet: list.filter(t => t.taxCategory === '1A').reduce((acc, t) => acc + t.amountExclVat, 0),
+        btw: list.filter(t => t.taxCategory === '1A').reduce((acc, t) => acc + t.vatAmount, 0)
+      },
+      rubriek4a: {
+        omzet: list.filter(t => t.taxCategory === '4A').reduce((acc, t) => acc + t.amountExclVat, 0),
+        btw: list.filter(t => t.taxCategory === '4A').reduce((acc, t) => acc + t.vatAmount, 0)
+      },
+      rubriek4b: {
+        omzet: list.filter(t => t.taxCategory === '4B').reduce((acc, t) => acc + t.amountExclVat, 0),
+        btw: list.filter(t => t.taxCategory === '4B').reduce((acc, t) => acc + t.vatAmount, 0)
+      }
+    };
+  });
+
+  // --- DATA OPSLAG (ongewijzigd) ---
   private async saveToDisk() {
     const electron = (window as any).electron;
     if (electron) {
@@ -30,36 +74,39 @@ export class FinanceService {
     }
   }
 
-  // Hulpfunctie om data te laden bij opstarten
   private async loadFromDisk() {
     const electron = (window as any).electron;
     if (electron) {
       const data = await electron.getData('finance_data');
       if (data && Array.isArray(data)) {
-        // BELANGRIJK: JSON maakt van een Date een string.
-        // We moeten er weer echte Date objecten van maken voor de kalender/filters.
         const formattedData = data.map(t => ({
           ...t,
-          date: new Date(t.date)
+          date: new Date(t.date),
+          taxCategory: t.taxCategory || 'NONE'
         }));
         this.transactions.set(formattedData);
       }
     }
   }
 
+  // --- ACTIES (ongewijzigd) ---
   addTransaction(
     amountInput: number,
     vatRate: number,
     type: 'INCOME' | 'EXPENSE',
     desc: string,
     date: Date,
-    mode: 'INCL' | 'EXCL' = 'INCL'
+    mode: 'INCL' | 'EXCL' = 'INCL',
+    taxCategory: '1A' | '1B' | '4A' | '4B' | 'NONE' = 'NONE'
   ) {
-    let excl: number;
-    let vat: number;
-    let incl: number;
+    let excl: number, vat: number, incl: number;
 
-    if (mode === 'INCL') {
+    if (taxCategory === '4A' || taxCategory === '4B') {
+      excl = amountInput;
+      vat = excl * (vatRate / 100);
+      incl = excl;
+    }
+    else if (mode === 'INCL') {
       excl = amountInput / (1 + (vatRate / 100));
       incl = amountInput;
       vat = incl - excl;
@@ -74,26 +121,20 @@ export class FinanceService {
       date: date,
       description: desc,
       amountExclVat: Number(excl.toFixed(2)),
-      vatPercentage: vatRate as any,
+      vatPercentage: vatRate as 0 | 9 | 21,
       vatAmount: Number(vat.toFixed(2)),
       amountInclVat: Number(incl.toFixed(2)),
       type: type,
-      category: 'Algemeen'
+      category: 'Algemeen',
+      taxCategory: taxCategory
     };
 
     this.transactions.update(prev => [...prev, newTransaction]);
-
-    // Direct opslaan naar het JSON bestand
     this.saveToDisk();
   }
 
   deleteTransaction(id: string) {
-    this.transactions.update(prev => {
-      const newList = prev.filter(t => t.id !== id);
-      return newList;
-    });
-
-    // Direct de nieuwe lijst opslaan en localStorage negeren
+    this.transactions.update(prev => prev.filter(t => t.id !== id));
     this.saveToDisk();
   }
 }

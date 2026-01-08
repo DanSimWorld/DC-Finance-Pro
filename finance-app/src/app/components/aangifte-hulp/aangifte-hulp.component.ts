@@ -34,21 +34,37 @@ export class AangifteHulpComponent {
       return d.getFullYear() === year && tq === q;
     });
 
-    const omzet = quarterTx.filter(t => t.type === 'INCOME');
     const kosten = quarterTx.filter(t => t.type === 'EXPENSE');
 
-    const btwVerkoop = omzet.reduce((acc, t) => acc + t.vatAmount, 0);
-    const btwInkoop = kosten.reduce((acc, t) => acc + t.vatAmount, 0);
+    // Rubriek 1a (Verkoop binnenland) - AFRONDEN NAAR BENEDEN
+    const r1a_omzet = quarterTx.filter(t => t.taxCategory === '1A').reduce((acc, t) => acc + t.amountExclVat, 0);
+    const r1a_btw_raw = quarterTx.filter(t => t.taxCategory === '1A').reduce((acc, t) => acc + t.vatAmount, 0);
+    const r1a_btw = Math.floor(r1a_btw_raw); // Hele euro's omlaag
+
+    // Rubriek 4a (Verlegd Buiten EU) - AFRONDEN NAAR BENEDEN
+    const r4a_omzet = quarterTx.filter(t => t.taxCategory === '4A').reduce((acc, t) => acc + t.amountExclVat, 0);
+    const r4a_btw_raw = quarterTx.filter(t => t.taxCategory === '4A').reduce((acc, t) => acc + t.vatAmount, 0);
+    const r4a_btw = Math.floor(r4a_btw_raw);
+
+    // Rubriek 4b (Verlegd Binnen EU) - AFRONDEN NAAR BENEDEN
+    const r4b_omzet = quarterTx.filter(t => t.taxCategory === '4B').reduce((acc, t) => acc + t.amountExclVat, 0);
+    const r4b_btw_raw = quarterTx.filter(t => t.taxCategory === '4B').reduce((acc, t) => acc + t.vatAmount, 0);
+    const r4b_btw = Math.floor(r4b_btw_raw);
+
+    // Rubriek 5b (Voorbelasting) - AFRONDEN NAAR BOVEN
+    const voorbelasting_raw = kosten.reduce((acc, t) => acc + t.vatAmount, 0);
+    const voorbelasting = Math.ceil(voorbelasting_raw); // Hele euro's omhoog
+
+    // Totaalberekening op basis van de afgeronde getallen
+    const totaalVerschuldigd = r1a_btw + r4a_btw + r4b_btw;
+    const eindTotaal = totaalVerschuldigd - voorbelasting;
 
     return {
-      rubriek1a: {
-        grondslag: omzet.reduce((acc, t) => acc + t.amountExclVat, 0),
-        btw: btwVerkoop
-      },
-      rubriek5b: {
-        voorbelasting: btwInkoop
-      },
-      totaal: btwVerkoop - btwInkoop
+      rubriek1a: { grondslag: Math.floor(r1a_omzet), btw: r1a_btw },
+      rubriek4a: { grondslag: Math.floor(r4a_omzet), btw: r4a_btw },
+      rubriek4b: { grondslag: Math.floor(r4b_omzet), btw: r4b_btw },
+      rubriek5b: { voorbelasting: voorbelasting },
+      totaal: eindTotaal
     };
   });
 
